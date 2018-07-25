@@ -25,7 +25,59 @@ import PlaygroundSupport
 
 PlaygroundPage.current.needsIndefiniteExecution = true
 
+enum BetamaxAPI {
+    case showScreencasts
+    case showVideo(id: Int)
+}
 
+extension BetamaxAPI: TargetType {
+    
+    var baseURL: URL {
+        return URL(string: "https://videos.raywenderlich.com/api/v1")!
+    }
+    
+    var path: String {
+        switch self {
+        case .showScreencasts:
+            return "/videos"
+        case .showVideo(id: let id):
+            return "/videos/\(id)"
+        }
+    }
+    
+    var method: Method {
+        return .get }
+    
+    var sampleData: Data {
+        return Data()
+    }
+    
+    var task: Task {
+        switch self {
+        case .showScreencasts:
+            return .requestParameters(parameters: ["format" : "screencast"],
+                                      encoding: URLEncoding.queryString)
+        case .showVideo:
+            return .requestPlain
+        }
+    }
+    
+    var headers: [String : String]? {
+        return ["Content-type" : "application/json"]
+    }
+}
+
+let provider = MoyaProvider<BetamaxAPI>()
+
+provider.request(.showScreencasts) { result in
+    switch result {
+    case .success(let response):
+        print(response.statusCode)
+        print(String(bytes: response.data, encoding: .utf8)!)
+    case .failure(let error):
+        print(error)
+    }
+}
 
 
 
