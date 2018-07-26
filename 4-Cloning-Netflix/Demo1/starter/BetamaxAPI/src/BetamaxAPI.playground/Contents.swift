@@ -94,11 +94,13 @@ let provider = MoyaProvider<BetamaxAPI>(
     plugins: [AccessTokenPlugin(tokenClosure: authToken)]
 )
 
-provider.request(.showVideo(id: 1491)) { result in
+provider.request(.getProgress(userId: userId)) { result in
     switch result {
     case .success(let response):
         print(response.statusCode)
-        print(String(bytes: response.data, encoding: .utf8)!)
+        let progress = try! response.map([ProgressParams].self, atKeyPath:
+            "viewings")
+        print(progress.filter { $0.videoId == 452 })
     case .failure(let error):
         print(error)
     }
