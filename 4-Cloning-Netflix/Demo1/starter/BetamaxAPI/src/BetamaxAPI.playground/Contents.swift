@@ -28,6 +28,8 @@ PlaygroundPage.current.needsIndefiniteExecution = true
 enum BetamaxAPI {
     case showScreencasts
     case showVideo(id: Int)
+    case getProgress(userId: String)
+    case updateProgress(userId: String, progress: ProgressParams)
 }
 
 extension BetamaxAPI: TargetType {
@@ -42,11 +44,20 @@ extension BetamaxAPI: TargetType {
             return "/videos"
         case .showVideo(id: let id):
             return "/videos/\(id)"
+        case .getProgress(let userId),
+             .updateProgress(let userId, _):
+            return "/users/\(userId)/viewings"
         }
     }
     
     var method: Method {
-        return .get }
+        switch self {
+        case .updateProgress:
+            return .post
+        default:
+            return .get
+        }
+    }
     
     var sampleData: Data {
         return Data()
@@ -57,8 +68,10 @@ extension BetamaxAPI: TargetType {
         case .showScreencasts:
             return .requestParameters(parameters: ["format" : "screencast"],
                                       encoding: URLEncoding.queryString)
-        case .showVideo:
+        case .showVideo, .getProgress:
             return .requestPlain
+        case .updateProgress(userId: _, progress: let progress):
+            return .requestJSONEncodable(progress)
         }
     }
     
@@ -81,7 +94,7 @@ let provider = MoyaProvider<BetamaxAPI>(
     plugins: [AccessTokenPlugin(tokenClosure: authToken)]
 )
 
-provider.request(.showScreencasts) { result in
+provider.request(.showVideo(id: 1491)) { result in
     switch result {
     case .success(let response):
         print(response.statusCode)
