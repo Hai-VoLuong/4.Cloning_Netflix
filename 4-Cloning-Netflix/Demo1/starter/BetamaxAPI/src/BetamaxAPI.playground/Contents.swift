@@ -67,7 +67,19 @@ extension BetamaxAPI: TargetType {
     }
 }
 
-let provider = MoyaProvider<BetamaxAPI>()
+let userId = "00421d2c-176a-11e7-8099-b7b32623e8a9"
+let authToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIwMDQyMWQyYy0xNzZhLTExZTctODA5OS1iN2IzMjYyM2U4YTkiLCJpYXQiOjE1MzI2MTg0NjB9.nD9eGAFRCMH0LU7EmVB7PRqRUuNT9ONV4PirvyUwIQA"
+
+extension BetamaxAPI: AccessTokenAuthorizable {
+
+    var authorizationType: AuthorizationType {
+        return .bearer
+    }
+}
+
+let provider = MoyaProvider<BetamaxAPI>(
+    plugins: [AccessTokenPlugin(tokenClosure: authToken)]
+)
 
 provider.request(.showScreencasts) { result in
     switch result {
